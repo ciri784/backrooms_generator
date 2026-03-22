@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Backrooms - Survival</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #0a0a05;
+            color: #c9b458;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(201, 180, 88, 0.02);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #game {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(20, 20, 10, 0.95);
+            border: 1px solid #3a3520;
+            padding: 30px;
+            position: relative;
+        }
+
+        #game::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c9b458, transparent);
+            opacity: 0.4;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #e8d78a;
+            letter-spacing: 6px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(232, 215, 138, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6a5a30;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+        }
+
+        #stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #2a2515;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: #6a5a30;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            color: #c9b458;
+        }
+
+        .stat-value.danger { color: #d45050; }
+        .stat-value.warning { color: #d4a050; }
+
+        #level-info {
+            text-align: center;
+            padding: 15px;
+            background: rgba(201, 180, 88, 0.05);
+            border: 1px solid #3a3520;
+            margin-bottom: 20px;
+        }
+
+        #level-name {
+            font-size: 1.1rem;
+            color: #e8d78a;
+            letter-spacing: 3px;
+        }
+
+        #room-desc {
+            font-size: 0.85rem;
+            color: #8a7a3a;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        #narrative {
+            min-height: 120px;
+            padding: 20px;
+            background: rgba(0,0,0,0.4);
+            border-left: 2px solid #c9b458;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        #narrative.event { border-left-color: #d45050; }
+        #narrative.item { border-left-color: #50d450; }
+        #narrative.entity { border-left-color: #d45050; }
+
+        #actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid #3a3520;
+            color: #8a7a3a;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: #c9b458;
+            color: #c9b458;
+            background: rgba(201, 180, 88, 0.1);
+        }
+
+        .action-btn:active {
+            background: rgba(201, 180, 88, 0.2);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .action-btn.primary {
+            border-color: #c9b458;
+            color: #c9b458;
+            grid-column: 1 / -1;
+        }
+
+        #game-over {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 5, 0.98);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+        }
+
+        #game-over.show { display: flex; }
+
+        #game-over h2 {
+            font-size: 2rem;
+            color: #d45050;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+
+        #game-over p {
+            color: #6a5a30;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        #restart-btn {
+            background: transparent;
+            border: 1px solid #d45050;
+            color: #d45050;
+            padding: 15px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            letter-spacing: 3px;
+        }
+
+        #restart-btn:hover {
+            background: rgba(212, 80, 80, 0.1);
+        }
+
+        .inventory {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .inv-item {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            background: rgba(80, 212, 80, 0.1);
+            border: 1px solid #50d450;
+            color: #50d450;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>THE BACKROOMS</h1>
+        <p class="subtitle">SURVIVAL MODE</p>
+
+        <div id="stats">
+            <div class="stat">
+                <div class="stat-label">STABILITY</div>
+                <div class="stat-value" id="stability">100%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">LEVEL</div>
+                <div class="stat-value" id="level">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">ROOMS</div>
+                <div class="stat-value" id="rooms">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">ITEMS</div>
+                <div class="stat-value" id="item-count">0</div>
+            </div>
+        </div>
+
+        <div id="level-info">
+            <div id="level-name">LEVEL 0 — THE LOBBY</div>
+            <div id="room-desc">Loading...</div>
+        </div>
+
+        <div id="narrative">You wake up somewhere you shouldn't be. Yellow light flickers above. The air smells wrong. You need to find a way out.</div>
+
+        <div id="actions">
+            <button class="action-btn" onclick="moveOn()">MOVE FORWARD</button>
+            <button class="action-btn" onclick="search()">SEARCH</button>
+            <button class="action-btn" onclick="hide()">HIDE</button>
+            <button class="action-btn" onclick="useItem()">USE ITEM</button>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h2>YOU DIED</h2>
+        <p id="death-msg">The Backrooms claimed another victim.</p>
+        <button id="restart-btn" onclick="startGame()">TRY AGAIN</button>
+    </div>
+
+    <script>
+        // ============================================================
+        // GAME DATA
+        // ============================================================
+
+        const LEVELS = [
+            { num: 0, name: "THE LOBBY", desc: "Office maze. Yellow walls. The hum.", entities: ["Wretches", "Faceless"], difficulty: 1 },
+            { num: 1, name: "THE PACKING ROOMS", desc: "Wooden crates everywhere. Some are open.", entities: ["Wretches", "Smiler"], difficulty: 1 },
+            { num: 2, name: "PIPE HEAVEN", desc: "An endless network of pipes. It hums.", entities: ["Deathmoth", "Cursor"], difficulty: 2 },
+            { num: 3, name: "THE OFFICES", desc: "Filing cabinets. Papers everywhere.", entities: ["Faceless", "Skinless"], difficulty: 2 },
+            { num: 4, name: "ABANDONED CONCRETE", desc: "Structural supports that make no sense.", entities: ["Smiler", "Partygoers"], difficulty: 3 },
+            { num: 5, name: "HOTELS & ROOMS", desc: "A hotel that goes on forever.", entities: ["Partygoers", "The Thing That Tastes Color"], difficulty: 3 },
+            { num: 6, name: "THE WATER ZONE", desc: "Pools of liquid in dark rooms.", entities: ["The Thing That Tastes Color", "Cursor"], difficulty: 4 },
+            { num: 7, name: "THE GOLF COURSE", desc: "An endless course. The flag is always the same distance away.", entities: ["Cursor", "Skinless"], difficulty: 5 },
+        ];
+
+        const ENTITY_TEMPLATES = {
+            "Wretches": { desc: "Crawling things. They used to be human. They skitter in the dark.", action: "RUN", escapeChance: 0.6, damage: 20 },
+            "Faceless": { desc: "No face. Just smooth skin where features should be. It's looking for something.", action: "HIDE", escapeChance: 0.4, damage: 15 },
+            "Smiler": { desc: "It smiles. Always. Its face frozen in joy. But its eyes are wrong.", action: "CLOSE EYES", escapeChance: 0.5, damage: 25 },
+            "Deathmoth": { desc: "Moths the size of dogs. They circle lights that don't exist.", action: "STAY STILL", escapeChance: 0.8, damage: 5 },
+            "Partygoers": { desc: "They wear colorful masks. They dance in rooms that shouldn't exist.", action: "DON'T DISTURB", escapeChance: 0.7, damage: 10 },
+            "The Thing That Tastes Color": { desc: "A wet, clicking sound. Then it appears. It tilts its head. Tasting the air.", action: "HOLD BREATH", escapeChance: 0.3, damage: 35 },
+            "Cursor": { desc: "A shadow that moves wrong. It drifts. It has too many joints.", action: "RUN", escapeChance: 0.5, damage: 30 },
+            "Skinless": { desc: "Almost human. But skinless. Red, wet tissue glistens under the light.", action: "RUN", escapeChance: 0.4, damage: 40 },
+        };
+
+        const ITEMS = [
+            { name: "Flashlight", desc: "Fends off Wretches", effect: "escape_bonus", value: 0.2 },
+            { name: "Painkillers", desc: "Reduces damage taken", effect: "damage_reduction", value: 10 },
+            { name: " Almond Water", desc: "Who knows what it does", effect: "stability_restore", value: 15 },
+            { name: "Gauss Meter", desc: "Detects entities nearby", effect: "detect", value: 1 },
+            { name: "Bandages", desc: "Basic healing", effect: "stability_restore", value: 20 },
+        ];
+
+        const SAFE_ACTIONS = {
+            "Wretches": "RUN",
+            "Faceless": "HIDE",
+            "Smiler": "CLOSE EYES",
+            "Deathmoth": "STAY STILL",
+            "Partygoers": "DON'T DISTURB",
+            "The Thing That Tastes Color": "HOLD BREATH",
+            "Cursor": "RUN",
+            "Skinless": "RUN",
+        };
+
+        // ============================================================
+        // GAME STATE
+        // ============================================================
+
+        let state = {};
+
+        function initState() {
+            state = {
+                stability: 100,
+                level: 0,
+                rooms: 0,
+                inventory: [],
+                hasFlashlight: false,
+                currentEntity: null,
+                entityLevel: 0,
+                narrativeClass: "",
+            };
+        }
+
+        // ============================================================
+        // UTILITIES
+        // ============================================================
+
+        function pick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function chance(prob) {
+            return Math.random() < prob;
+        }
+
+        function clamp(v, min, max) {
+            return Math.max(min, Math.min(max, v));
+        }
+
+        // ============================================================
+        // GAME LOGIC
+        // ============================================================
+
+        function getCurrentLevel() {
+            return LEVELS[state.level];
+        }
+
+        function generateRoomDesc() {
+            const templates = [
+                "You are in {size} {type}. {detail}",
+                "A {type} stretches before you. {detail}",
+                "You find yourself in a {type}. {detail}",
+            ];
+            const sizes = ["small", "cramped", "vast", "narrow", "seemingly infinite"];
+            const types = ["room", "hallway", "corridor", "space", "chamber"];
+            const details = [
+                "The fluorescent lights buzz overhead.",
+                "Yellow wallpaper peels from the walls.",
+                "The air is thick and stale.",
+                "Something drips in the distance.",
+                "You hear something moving.",
+                "The walls feel wrong. Too close.",
+                "Muffled sounds echo from somewhere.",
+                "The floor is wet. You're not sure with what.",
+            ];
+            return pick(templates)
+                .replace("{size}", pick(sizes))
+                .replace("{type}", pick(types))
+                .replace("{detail}", pick(details));
+        }
+
+        function updateUI() {
+            const stab = document.getElementById("stability");
+            stab.textContent = state.stability + "%";
+            stab.className = "stat-value" + (state.stability <= 25 ? " danger" : state.stability <= 50 ? " warning" : "");
+
+            document.getElementById("level").textContent = state.level;
+            document.getElementById("rooms").textContent = state.rooms;
+            document.getElementById("item-count").textContent = state.inventory.length;
+
+            const lv = getCurrentLevel();
+            document.getElementById("level-name").textContent = `LEVEL ${lv.num} — ${lv.name}`;
+            document.getElementById("room-desc").textContent = lv.desc;
+        }
+
+        function narrative(text, cls = "") {
+            const el = document.getElementById("narrative");
+            el.textContent = text;
+            el.className = cls || "";
+        }
+
+        function checkGameOver() {
+            if (state.stability <= 0) {
+                const msgs = [
+                    "The Backrooms claimed another victim.",
+                    "You wandered too far. There is no way back.",
+                    "Something caught up to you.",
+                    "You should have run when you had the chance.",
+                ];
+                document.getElementById("death-msg").textContent = pick(msgs);
+                document.getElementById("game-over").classList.add("show");
+                return true;
+            }
+            return false;
+        }
+
+        // ============================================================
+        // ACTIONS
+        // ============================================================
+
+        function moveOn() {
+            state.rooms++;
+
+            // Random level transition (10% chance to go deeper)
+            if (chance(0.1) && state.level < 7) {
+                state.level++;
+                narrative(`You find a stairway leading ${state.level > 5 ? "up" : "down"}. You descend into Level ${state.level}.\n\nThe atmosphere changes. ${getCurrentLevel().desc}`, "");
+            } else {
+                narrative(`You move forward through the ${getCurrentLevel().name}.\n\n${generateRoomDesc()}`);
+            }
+
+            updateUI();
+
+            // Entity encounter (15% base chance, scales with level)
+            const encounterChance = 0.15 + (state.level * 0.05);
+            if (chance(encounterChance)) {
+                setTimeout(spawnEntity, 500);
+            }
+        }
+
+        function search() {
+            state.rooms++;
+            updateUI();
+
+            if (chance(0.4)) {
+                const item = pick(ITEMS);
+                state.inventory.push(item);
+                narrative(`You search the area and find: ${item.name}\n${item.desc}`, "item");
+            } else if (chance(0.3)) {
+                narrative("You search but find nothing useful. Just dust and the smell of wet carpet.", "");
+            } else {
+                narrative("You hear something while searching. You freeze. Then it passes.", "");
+            }
+
+            // Risk of entity during search
+            if (chance(0.2 + state.level * 0.03)) {
+                setTimeout(spawnEntity, 800);
+            }
+        }
+
+        function hide() {
+            if (state.currentEntity) {
+                // Already in entity encounter
+                entityEncounter("HIDE");
+                return;
+            }
+
+            state.rooms++;
+            updateUI();
+
+            if (chance(0.6)) {
+                narrative("You find a hiding spot and stay still. The sounds fade. You're alone. For now.", "");
+            } else {
+                narrative("You hide but hear something getting closer. It knows you're here.", "");
+                if (chance(0.4)) {
+                    setTimeout(spawnEntity, 600);
+                }
+            }
+        }
+
+        function useItem() {
+            if (state.inventory.length === 0) {
+                narrative("You have no items.", "");
+                return;
+            }
+
+            const item = state.inventory.shift();
+            switch (item.effect) {
+                case "stability_restore":
+                    state.stability = clamp(state.stability + item.value, 0, 100);
+                    narrative(`You use ${item.name}. ${item.desc}\n\n+${item.value}% Stability`, "item");
+                    break;
+                case "damage_reduction":
+                    state.stability = clamp(state.stability + item.value, 0, 100);
+                    narrative(`You use ${item.name}. ${item.desc}\n\nDamage reduced for next encounter`, "item");
+                    break;
+                case "escape_bonus":
+                    state.hasFlashlight = true;
+                    narrative(`You equip ${item.name}. ${item.desc}\n\nWretches will fear you.`, "item");
+                    break;
+                default:
+                    narrative(`You use ${item.name}. Nothing happens.`, "");
+            }
+
+            updateUI();
+        }
+
+        // ============================================================
+        // ENTITY ENCOUNTERS
+        // ============================================================
+
+        function spawnEntity() {
+            const level = getCurrentLevel();
+            const entityName = pick(level.entities);
+            const entity = ENTITY_TEMPLATES[entityName];
+
+            state.currentEntity = entityName;
+            state.entityLevel = level.num;
+
+            narrative(`WARNING: ${entityName.toUpperCase()}\n\n${entity.desc}\n\nRecommended action: ${entity.action}`, "entity");
+
+            // Change action buttons during encounter
+            const actions = document.getElementById("actions");
+            actions.innerHTML = `
+                <button class="action-btn" onclick="entityEncounter('RUN')">RUN</button>
+                <button class="action-btn" onclick="entityEncounter('HIDE')">HIDE</button>
+                <button class="action-btn" onclick="entityEncounter('STAY STILL')">STAY STILL</button>
+                <button class="action-btn" onclick="entityEncounter('${entity.action}')">${entity.action}</button>
+            `;
+        }
+
+        function entityEncounter(action) {
+            const entityName = state.currentEntity;
+            const entity = ENTITY_TEMPLATES[entityName];
+
+            let escapeChance = entity.escapeChance;
+
+            // Modifiers
+            if (action === SAFE_ACTIONS[entityName]) {
+                escapeChance += 0.25;
+            }
+            if (state.hasFlashlight && entityName === "Wretches") {
+                escapeChance += 0.3;
+            }
+
+            // Almond Water bonus
+            const hasAlmondWater = state.inventory.some(i => i.name === "Almond Water");
+            if (hasAlmondWater && entityName === "The Thing That Tastes Color") {
+                escapeChance += 0.2;
+            }
+
+            if (chance(escapeChance)) {
+                narrative(`You ${action}.\n\nIt works. The ${entityName} loses interest and fades into the shadows.\n\nYou're safe. For now.`, "");
+            } else {
+                const damage = entity.damage - (state.inventory.some(i => i.effect === "damage_reduction") ? 10 : 0);
+                state.stability = clamp(state.stability - damage, 0, 100);
+                narrative(`You ${action}.\n\nThe ${entityName} catches you. Pain. ${damage}% Stability lost.`, "entity");
+            }
+
+            state.currentEntity = null;
+
+            // Reset action buttons
+            resetActions();
+            updateUI();
+
+            checkGameOver();
+        }
+
+        function resetActions() {
+            document.getElementById("actions").innerHTML = `
+                <button class="action-btn" onclick="moveOn()">MOVE FORWARD</button>
+                <button class="action-btn" onclick="search()">SEARCH</button>
+                <button class="action-btn" onclick="hide()">HIDE</button>
+                <button class="action-btn" onclick="useItem()">USE ITEM</button>
+            `;
+        }
+
+        // ============================================================
+        // START GAME
+        // ============================================================
+
+        function startGame() {
+            initState();
+            document.getElementById("game-over").classList.remove("show");
+            resetActions();
+            updateUI();
+            narrative("You wake up somewhere you shouldn't be. Yellow light flickers above. The air smells wrong. You need to find a way out.\n\nExplore carefully. Find items. Avoid entities. Survive.");
+        }
+
+        // Initialize
+        startGame();
+    </script>
+</body>
+</html>
