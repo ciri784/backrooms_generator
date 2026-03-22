@@ -4,46 +4,54 @@
 
 A generator that creates liminal space descriptions. Inspired by the Backrooms, Kane Pixels, and the uncanny feeling of familiar spaces becoming wrong.
 
-## Concept
+## Features
 
-Generate unsettling descriptions of impossible rooms — spaces that look almost normal but feel wrong. Yellow wallpaper. Fluorescent lights. The hum. The smell of wet carpet. You are not supposed to be here.
+- **Room Generator** — Generate unsettling descriptions of impossible rooms
+- **Entity Generator** — Create descriptions of the things that live in the Backrooms
+- **Web Interface** — Clean, atmospheric HTML interface with scanline effects
 
-## Usage
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+python web.py
+```
+
+Then open `http://localhost:5000` in your browser.
+
+## Command Line Mode
 
 ```bash
 python generator.py
-```
-
-Each run generates a random room description. Use `--count N` for N descriptions.
-
-```bash
 python generator.py --count 5
 ```
 
-## Output Example
+## Web Interface Preview
 
-```
-═══════════════════════════════════════════════════
-LEVEL 0 — THE LOBBY
-═══════════════════════════════════════════════════
+The web interface features:
+- Yellow-tinted color scheme with scanline effects
+- Level and entity generation panels
+- Authentic Backrooms atmosphere
 
-You are in a large room. The ceiling is too high.
-Yellow wallpaper is peeling off the walls.
-Somewhere, a fluorescent light is buzzing.
-The air smells like wet carpet and something else.
-You can't remember how you got here.
-There is no exit. There is only forward.
+## Levels
 
-» No entities detected... for now.
-» Stability: 12%
-```
+- Level 0 — THE LOBBY
+- Level 1 — THE PACKING ROOMS
+- Level 2 — PIPE HEAVEN
+- Level 3 — THE OFFICES
+- Level 4 — ABANDONED CONCRETE
+- Level 5 — HOTELS & ROOMS
+- Level 6 — THE WATER ZONE
+- Level 7 — THE GOLF COURSE
 
-## Categories
+## Entities
 
-- **Rooms**: lobby, office, hallway, warehouse, school, hotel, hospital, mall
-- **Vibes**: wrong ceiling height, peeling wallpaper, impossible architecture, familiar yet alien
-- **Sounds**: fluorescent hum, distant radio static, dripping water,脚步声（but you're alone）
-- **Noises**: the hum, the smell of wet carpet, temperature fluctuations, yellow tint to everything
+- Skinless — Red, wet muscle tissue glistening under fluorescent light
+- Smiler — Frozen smile, wrong eyes
+- Wretches — Crawling things that used to be human
+- Faceless — Smooth expanse where features should be
+- Deathmoth — Moths the size of dogs
+- Partygoers — Colorful masks, endless dancing
 
 ## Disclaimer
 
