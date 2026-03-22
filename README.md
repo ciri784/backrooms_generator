@@ -4,34 +4,18 @@
 
 A generator that creates liminal space descriptions. Inspired by the Backrooms, Kane Pixels, and the uncanny feeling of familiar spaces becoming wrong.
 
+## Live Demo
+
+**https://ciri784.github.io/backrooms_generator/**
+
+Open this URL in your browser. No server required.
+
 ## Features
 
 - **Room Generator** — Generate unsettling descriptions of impossible rooms
 - **Entity Generator** — Create descriptions of the things that live in the Backrooms
-- **Web Interface** — Clean, atmospheric HTML interface with scanline effects
-
-## Quick Start
-
-```bash
-pip install -r requirements.txt
-python web.py
-```
-
-Then open `http://localhost:5000` in your browser.
-
-## Command Line Mode
-
-```bash
-python generator.py
-python generator.py --count 5
-```
-
-## Web Interface Preview
-
-The web interface features:
-- Yellow-tinted color scheme with scanline effects
-- Level and entity generation panels
-- Authentic Backrooms atmosphere
+- **Static HTML** — Runs entirely in your browser, no backend needed
+- **Atmospheric Design** — Yellow-tinted color scheme with scanline effects
 
 ## Levels
 
@@ -46,12 +30,18 @@ The web interface features:
 
 ## Entities
 
-- Skinless — Red, wet muscle tissue glistening under fluorescent light
-- Smiler — Frozen smile, wrong eyes
-- Wretches — Crawling things that used to be human
-- Faceless — Smooth expanse where features should be
-- Deathmoth — Moths the size of dogs
-- Partygoers — Colorful masks, endless dancing
+- **Skinless** — Red, wet muscle tissue glistening under fluorescent light
+- **Smiler** — Frozen smile, wrong eyes
+- **Wretches** — Crawling things that used to be human
+- **Faceless** — Smooth expanse where features should be
+- **Deathmoth** — Moths the size of dogs
+- **The Thing That Tastes Color** — Wet, clicking sounds
+- **Partygoers** — Colorful masks, endless dancing
+- **Cursor** — Shadow that moves wrong
+
+## For Developers
+
+The `index.html` is a self-contained static page. All generation logic runs in JavaScript.
 
 ## Disclaimer
 

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Backrooms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a0f;
+            color: #c9b458;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(201, 180, 88, 0.03);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #e8d78a;
+            text-shadow: 0 0 20px rgba(232, 215, 138, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8a7a3a;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            letter-spacing: 4px;
+        }
+
+        .warning-banner {
+            background: rgba(201, 180, 88, 0.1);
+            border: 1px solid #c9b458;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 0.85rem;
+            color: #a09040;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(30, 30, 20, 0.8);
+            border: 1px solid #3a3a25;
+            padding: 25px;
+            position: relative;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #c9b458, transparent);
+            opacity: 0.3;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            color: #e8d78a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3a3a25;
+            letter-spacing: 3px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #c9b458;
+            color: #c9b458;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background: rgba(201, 180, 88, 0.2);
+            color: #e8d78a;
+        }
+
+        .btn:active {
+            background: rgba(201, 180, 88, 0.3);
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 2px solid #c9b458;
+            min-height: 200px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .output.level-header {
+            color: #e8d78a;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .output.entity-name {
+            color: #d45050;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            color: #6a6a4a;
+            font-style: italic;
+        }
+
+        .static-text {
+            text-align: center;
+            color: #5a5a3a;
+            font-size: 0.8rem;
+            margin-top: 30px;
+            letter-spacing: 2px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #4a4a2a;
+            font-size: 0.75rem;
+            border-top: 1px solid #2a2a1a;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>THE BACKROOMS</h1>
+        <p class="subtitle">YOU SHOULDN'T HAVE COME HERE</p>
+
+        <div class="warning-banner">
+            ⚠ IF YOU'RE NOT CAREFUL AND YOU NOOCIPE SOME OF THE PRECESS OF THIS LEVEL AND YOU GET CAUGHT IN THE WRONG PLACE, THE ENTITY WILL FOLLOW YOU AND KILL YOU. ⚠
+        </div>
+
+        <div class="panels">
+            <div class="panel">
+                <h2 class="panel-title">[ ROOM ]</h2>
+                <button class="btn" onclick="generateRoom()">GENERATE ROOM</button>
+                <div id="room-output" class="output">
+                    Click the button to generate a room description...
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">[ ENTITY ]</h2>
+                <button class="btn" onclick="generateEntity()">GENERATE ENTITY</button>
+                <div id="entity-output" class="output">
+                    Click the button to generate an entity description...
+                </div>
+            </div>
+        </div>
+
+        <p class="static-text">FLOOR 0 · THE LOBBY · NO ENTITIES DETECTED</p>
+
+        <div class="footer">
+            Backrooms Generator v0.3 (Static) · For entertainment purposes only
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ROOM GENERATION DATA
+        // ============================================================
+
+        const ROOMS = [
+            {
+                template: "a large {room_size} lobby",
+                desc: "The ceiling is impossibly high. Yellow wallpaper peels in long strips."
+            },
+            {
+                template: "a {room_size} office space",
+                desc: "Desks are arranged in perfect rows. None of the chairs face the same direction."
+            },
+            {
+                template: "a long, narrow hallway",
+                desc: "The walls are covered in {wall_cover}. Doors line both sides. None of them have handles."
+            },
+            {
+                template: "an abandoned warehouse",
+                desc: "Shipping containers sit in no particular order. The floor is wet. The light is yellow."
+            },
+            {
+                template: "a {room_size} school corridor",
+                desc: "Classroom doors are closed. Behind one of them, you hear something."
+            },
+            {
+                template: "a {room_size} hotel lobby",
+                desc: "The front desk is unmanned. Always. A radio somewhere is playing nothing."
+            },
+            {
+                template: "an underground parking structure",
+                desc: "Cars that don't move. The lights flicker. The exit is never where you left it."
+            },
+            {
+                template: "a {room_size} hospital waiting room",
+                desc: "Magazines from years ago. Water stains on the ceiling. The waiting never ends."
+            },
+        ];
+
+        const ROOM_SIZES = ["small", "medium-sized", "large", "vast", "seemingly infinite"];
+
+        const WALL_COVERINGS = [
+            "yellow wallpaper, peeling at the edges",
+            "water-stained ceiling tiles",
+            "mysterious brown stains",
+            "tiles that shouldn't be there",
+            "windows that look out on nothing",
+        ];
+
+        const CEILING_ISSUES = [
+            "The ceiling is too high.",
+            "The ceiling is too low.",
+            "There is no ceiling. You don't want to look up.",
+            "The ceiling tiles are arranged wrong.",
+        ];
+
+        const LIGHT_ISSUES = [
+            "Somewhere, a fluorescent light is buzzing.",
+            "A light flickers in the corner of your vision.",
+            "The lights are too bright. Or too dim. You can't tell anymore.",
+            "There are no windows. There is no natural light.",
+            "Yellow light fills every corner. It's always yellow here.",
+        ];
+
+        const SMELLS = [
+            "The air smells like wet carpet.",
+            "There's an underlying scent of something metallic.",
+            "It smells like old paper and dust.",
+            "The air is stale. Has it been circulating?",
+            "Something sweet. Something rotting underneath.",
+        ];
+
+        const SOUNDS = [
+            "You hear something in the distance.",
+            "A fluorescent light is buzzing.",
+            "Water dripping. Constant. Rhythmic.",
+            "Distant radio static. No station.",
+            "Your footsteps echo too much.",
+            "A door closes somewhere. But all doors are closed.",
+            "You hear breathing. You're alone.",
+        ];
+
+        const ENTITY_HINTS = [
+            "No entities detected... for now.",
+            "You are not alone here. You just can't see them yet.",
+            "Something watched you come in. It's still watching.",
+            "The entities in this level are known to be territorial.",
+            "You hear footsteps. They don't match yours.",
+            "A sound behind you. Don't turn around.",
+        ];
+
+        const STABILITY_LEVELS = [
+            "12%", "8%", "23%", "3%", "31%", "17%", "41%", "0%", "67%", "unstable"
+        ];
+
+        const LEVEL_NAMES = [
+            { num: "0", name: "THE LOBBY", subtitle: "The most well-known level. Office maze. Yellow walls. The hum." },
+            { num: "1", name: "THE PACKING ROOMS", subtitle: "Rooms full of wooden crates. Some of them are open." },
+            { num: "2", name: "PIPE HEAVEN", subtitle: "An endless network of pipes. It hums. You hear water." },
+            { num: "3", name: "THE OFFICES", subtitle: "Filing cabinets. Papers everywhere. Something in the cabinets moves." },
+            { num: "4", name: "ABANDONED CONCRETE", subtitle: "Structural supports you don't understand. This place wasn't built." },
+            { num: "5", name: "HOTELS & ROOMS", subtitle: "A hotel that goes on forever. Room 5 is always occupied." },
+            { num: "6", name: "THE WATER ZONE", subtitle: "Pools of liquid in dark rooms. Some of it is water. Probably." },
+            { num: "7", name: "THE GOLF COURSE", subtitle: "An endless golf course. The flag is always the same distance away." },
+        ];
+
+        // ============================================================
+        // ENTITY GENERATION DATA
+        // ============================================================
+
+        const ENTITY_TYPES = [
+            {
+                name: "Skinless",
+                desc: "They look almost human, but their skin has been... removed. What remains is red, wet muscle tissue that glistens under the fluorescent light."
+            },
+            {
+                name: "Smiler",
+                desc: "It smiles. Always. Its face is frozen in an expression of pure joy. But its eyes... its eyes are wrong."
+            },
+            {
+                name: "Wretches",
+                desc: "Crawling things. They used to be human. Now they move on all fours, making sounds that aren't quite animal."
+            },
+            {
+                name: "Faceless",
+                desc: "They have no face. Just a smooth expanse of skin where features should be. They seem to be looking for something."
+            },
+            {
+                name: "Deathmoth",
+                desc: "Moths the size of dogs. They circle lights that don't exist. They don't attack. They just... watch."
+            },
+            {
+                name: "The Thing That Tastes Color",
+                desc: "You hear it before you see it. A wet, clicking sound. Then it appears. It tilts its head. It's tasting the air."
+            },
+            {
+                name: "Partygoers",
+                desc: "They wear masks. Colorful masks. They dance in rooms that shouldn't exist. They don't notice you. Not yet."
+            },
+            {
+                name: "Cursor",
+                desc: "A shadow that moves wrong. It doesn't walk, it drifts. It has too many joints."
+            },
+        ];
+
+        const ENTITY_BEHAVIORS = [
+            "It doesn't seem to notice you.",
+            "It stops. It tilts its head. It knows you're here.",
+            "It runs. Toward you. Fast.",
+            "It stands in the corner, watching. It has been watching for a long time.",
+            "It screams. The sound doesn't come from its mouth.",
+            "It mimics your movements perfectly. A slight delay.",
+        ];
+
+        const ENTITY_WARNINGS = [
+            "DO NOT ENGAGE. DO NOT LOOK AT IT DIRECTLY.",
+            "It will kill you if it catches you. It always catches you eventually.",
+            "Entities are predictable. Learn their patterns. Don't be where they expect you to be.",
+            "Some say they used to be human. Don't think about that.",
+            "The only safe response is no response.",
+        ];
+
+        // ============================================================
+        // UTILITY FUNCTIONS
+        // ============================================================
+
+        function pick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffle(arr) {
+            const result = [...arr];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        // ============================================================
+        // GENERATION FUNCTIONS
+        // ============================================================
+
+        function generateRoom() {
+            const room = pick(ROOMS);
+            const room_size = pick(ROOM_SIZES);
+            const level = pick(LEVEL_NAMES);
+            const wall_cover = pick(WALL_COVERINGS);
+
+            const template = room.template.replace("{room_size}", room_size).replace("{wall_cover}", wall_cover);
+
+            const ceiling = pick(CEILING_ISSUES);
+            const light = pick(LIGHT_ISSUES);
+            const smell = pick(SMELLS);
+
+            const numSounds = Math.floor(Math.random() * 3) + 2; // 2-4 sounds
+            const sounds = shuffle(SOUNDS).slice(0, numSounds);
+
+            const entityHint = pick(ENTITY_HINTS);
+            const stability = pick(STABILITY_LEVELS);
+
+            let desc = `You are in ${template}.\n`;
+            desc += `${room.desc}\n\n`;
+            desc += `${ceiling}\n`;
+            desc += `${light}\n`;
+            desc += `${smell}\n\n`;
+
+            sounds.forEach(sound => {
+                desc += `${sound}\n`;
+            });
+
+            desc += `\nYou can't remember how you got here.\n`;
+            desc += `There is no exit. There is only forward.\n\n`;
+            desc += `[ ${entityHint} ]\n`;
+            desc += `[ Stability: ${stability} ]`;
+
+            return {
+                level_num: level.num,
+                level_name: level.name,
+                level_subtitle: level.subtitle,
+                description: desc
+            };
+        }
+
+        function generateEntity() {
+            const entity = pick(ENTITY_TYPES);
+            const behavior = pick(ENTITY_BEHAVIORS);
+            const warning = pick(ENTITY_WARNINGS);
+
+            return {
+                name: entity.name,
+                description: entity.desc,
+                behavior: behavior,
+                warning: warning
+            };
+        }
+
+        // ============================================================
+        // UI FUNCTIONS
+        // ============================================================
+
+        function generateRoom() {
+            const output = document.getElementById('room-output');
+            output.innerHTML = '<span class="loading">Generating</span>';
+            output.className = 'output';
+
+            setTimeout(() => {
+                const data = generateRoom();
+                output.innerHTML =
+                    `<span class="level-header">LEVEL ${data.level_num} — ${data.level_name}</span>\n` +
+                    `(${data.level_subtitle})\n\n` +
+                    `${data.description}`;
+            }, 300);
+        }
+
+        function generateEntity() {
+            const output = document.getElementById('entity-output');
+            output.innerHTML = '<span class="loading">Entity approaching</span>';
+            output.className = 'output';
+
+            setTimeout(() => {
+                const data = generateEntity();
+                output.innerHTML =
+                    `<span class="entity-name">${data.name}</span>\n\n` +
+                    `${data.description}\n\n` +
+                    `[ ${data.behavior} ]\n\n` +
+                    `⚠ ${data.warning}`;
+            }, 300);
+        }
+    </script>
+</body>
+</html>
