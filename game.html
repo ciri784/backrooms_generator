@@ -308,6 +308,11 @@
             color: #c9b458;
         }
 
+        #knowledge-list .pending-entity {
+            color: #8a7a3a;
+            font-style: italic;
+        }
+
         #game-over {
             display: none;
             position: fixed;
@@ -507,12 +512,18 @@
         function renderKnowledge() {
             const knowledgeDiv = document.getElementById("knowledge-list");
             const known = Object.keys(ENTITY_OBSERVE_KNOWLEDGE);
-            if (known.length === 0) {
+            const pending = state.observedEntity;
+            if (known.length === 0 && !pending) {
                 knowledgeDiv.innerHTML = "No observations yet.";
             } else {
-                knowledgeDiv.innerHTML = known.map(name =>
-                    `<span class="known-entity">${name}</span> (+${Math.round(ENTITY_OBSERVE_KNOWLEDGE[name] * 100)}%)`
-                ).join("<br>");
+                let html = "";
+                known.forEach(name => {
+                    html += `<span class="known-entity">${name}</span> (+${Math.round(ENTITY_OBSERVE_KNOWLEDGE[name] * 100)}%)<br>`;
+                });
+                if (pending) {
+                    html += `<span class="pending-entity">${pending}</span> (observing...)<br>`;
+                }
+                knowledgeDiv.innerHTML = html;
             }
         }
 
@@ -775,8 +786,14 @@
             } else {
                 let damage = entity.damage;
                 if (state.damageReduction > 0) damage = Math.max(5, damage - state.damageReduction);
+                // If player observed before this attempt, take extra damage (risk for knowledge)
+                if (state.observedEntity === entityName) {
+                    damage = Math.min(50, damage + 10);
+                    narrative(`You ${action}.\n\nThe ${entityName} catches you.\n\nYour observation made you hesitate. -\n${damage}% Stability`, "entity");
+                } else {
+                    narrative(`You ${action}.\n\nThe ${entityName} catches you.\n\n-${damage}% Stability`, "entity");
+                }
                 state.stability = clamp(state.stability - damage, 0, 100);
-                narrative(`You ${action}.\n\nThe ${entityName} catches you.\n\n-${damage}% Stability`, "entity");
                 state.hasFlashlight = false;
                 state.damageReduction = 0;
                 state.observedEntity = null;
@@ -798,6 +815,8 @@
 
         function startGame() {
             initState();
+            // Reset knowledge on new game
+            Object.keys(ENTITY_OBSERVE_KNOWLEDGE).forEach(key => delete ENTITY_OBSERVE_KNOWLEDGE[key]);
             document.getElementById("game-over").classList.remove("show");
             document.getElementById("actions").innerHTML = `
                 <button class="action-btn" onclick="moveOn()">MOVE</button>
